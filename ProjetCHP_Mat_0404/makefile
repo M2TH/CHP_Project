@@ -14,7 +14,7 @@ CXX_FLAGS = $(OPTIM_FLAG)
 PROG = run
 
 # Les fichiers source à compiler
-SRC = main.cpp function.cpp 
+SRC = main.cpp function.cpp gradConj.cpp
 
 # La commande complète : compile seulement si un fichier a été modifié
 $(PROG) : $(SRC)

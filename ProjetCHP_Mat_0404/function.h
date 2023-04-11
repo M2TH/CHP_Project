@@ -1,29 +1,14 @@
-#ifndef _FUNCTION_H
 
-// #include "DataFile.h"
-
-class Function {
-private:
-  // Quelques variables privées utiles pour
-  // construire la condition initiale et la solution exacte (sigma)
-  
-  //const double _xmin, _ymin;
-  // const double _xmax, _ymax;
-
-public:
-  // Constructeur
-  Function(DataFile* data_file);
-
-  // fonction f
-  double foncf(const double x, const double y) const;
-
-  // fonction g
-  double foncg(const double x, const double y) const;
-
-  //fonction h
-  double fonch(const double x, const double y) const;
-
-};
-
-#define _FUNCTION_H
-#endif
+#include <vector>
+using namespace std;
+double f_cas1(double x, double y, double t, double Lx, double Ly);
+double g_cas1(double x, double y, double t, double Lx, double Ly);
+double h_cas1(double x, double y, double t, double Lx, double Ly);
+double f_cas2(double x, double y, double t, double Lx, double Ly);
+double g_cas2(double x, double y, double t, double Lx, double Ly);
+double h_cas2(double x, double y, double t, double Lx, double Ly);
+double f_cas3(double x, double y, double t, double Lx, double Ly);
+double g_cas3(double x, double y, double t, double Lx, double Ly);
+double h_cas3(double x, double y, double t, double Lx, double Ly);
+vector <double> matvec(double alpha, double beta, double gamma, int Nx, int Ny, vector<double> U);
+void charge(int me, int n, int np, int *iBeg, int *iEnd);
