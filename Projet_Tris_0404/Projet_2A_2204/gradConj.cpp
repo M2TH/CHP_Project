@@ -30,13 +30,13 @@ double norm(const Vector& x) {
 
 
 // Solveur du system AU=F /Ax=b avec le gradient conjugué 
-vector<double> gradientConj(Vector& K, double tol, int maxiter) {       // const Matrix& A, const Vector& F, Vector& U, double tol, int maxiter) {
+vector<double> gradientConj(Vector& K, double tol, int maxiter, double alpha, double beta, double gamma, Vector& b) { //(Vector& K, double tol, int maxiter, double alpha, double beta, double gamma, Vector& b) {    
     // tol est la tolérance (seuil à atteindre pour considere la convergence)
     // maxiter est le garde-fou pour arreter le calcul en cas de non convergence
-    //K vecteur condition initiale 
-
-    // Inclure alpha, beta, gamma les coefficient de la matrice (ou les lires qq part)
-    double alpha, beta, gamma;
+    // K vecteur condition initiale     
+    // double alpha, beta, gamma; // Inclu alpha, beta, gamma (les coefficient de la matrice) pris en paramètre 
+    // b : vecteur second membre
+    
     int Nx, Ny ; 
 
     ////////////////////////////////////////
@@ -49,10 +49,11 @@ vector<double> gradientConj(Vector& K, double tol, int maxiter) {       // const
     // int n = A.size();
     int n = Nx* Ny ;
 
-    Vector r, b, d ;
+    Vector r, d ;
     ////////////////////////////////////////
-    // !!! ATTRIBUER DES VALEURS A r, d ET d
+    // !!! ATTRIBUER DES VALEURS A r, d
     ////////////////////////////////////////
+    // --> Lecture du second memebre b dans les paramètres. r et d initialisé ci dessous
 
     // Initialisatioin residu r = F - A*x
     for (int i = 0; i < n; i++) {

@@ -91,28 +91,25 @@ int main(int argc, char ** argv){
     flux.close();
     
 
-
-
-    int cas, n;
-    double alpha,beta,gamma,dx,dy;
+    int cas, maxiter, n;
+    double alpha,beta,gamma,dx,dy, tol;
     double x,y,t;
-    /*
-    double res;  // Qu'est ce que res ? (Inutile dans le main je crois)
-
-    
-    Lx=1;
-    Ly=1;
-    Nx=4;
-    Ny=3;
-    D = 1 ; */
  
-
     cas=2; //cas d'etude
+    tol = 0.01; // tolérance
+    maxiter = 1000 ; 
+
+
+
+
 
     // x=2; // A quoi servent x, y et t  ? est ce la position en x, y et le temps courant respectivement? 
     // y=1;
     // t=1;
     
+
+    // Définition des paramètres supplémentaires
+
     n=Nx*Ny; // dim du maillage
     dx=Lx/Nx; // pas selon x
     dy=Ly/Ny; // pas selon y
@@ -121,8 +118,9 @@ int main(int argc, char ** argv){
     beta=-1/(dx*dx);
     gamma=-1/(dy*dy);
 
-    vector<double> X(n),res_vec(n);
+    vector<double> X(n),res_vec(n), condInit(n);
    
+   // Initialisation
     
     for(int i=0;i<n;i++)
     {
@@ -130,6 +128,10 @@ int main(int argc, char ** argv){
     }
 
     X[4]=1;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // Test du produit matrice vecteur
+    /////////////////////////////////////////////////////////////////////////////////////////////
 
     res_vec=matvec(alpha,beta,gamma,Nx,Ny,X);
     cout<<"alpha="<<alpha<<" beta="<<beta<<" gamma="<<gamma<<endl;
@@ -145,7 +147,6 @@ int main(int argc, char ** argv){
     {
         X[i]=0;
     }
-
     //X[0]=1;
 
     t=0;
@@ -161,6 +162,22 @@ int main(int argc, char ** argv){
     {
         cout<<res_vec[i]<<"                         "<<X[i]<<endl;
     }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // Coeur du programme : appel du gradient conjugué
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+    // Construction d'un vecteur condition initial
+    for(int i=0;i<n;i++)
+    {
+        condInit[i]=1;
+    }
+
+
+    X = gradientConj( condInit , tol, maxiter, alpha, beta, gamma, res_vec);
 
 
 
