@@ -1,0 +1,8 @@
+set palette defined (-5 0 0 1, 0 1 1 1, 5 1 0 0)
+set terminal png
+set output "sol.10.png"
+plot "./sol.10.dat" u 1:2:3 with image
+#set title "./sol.10.dat"
+   
+show title
+pause 0.2
