@@ -15,11 +15,11 @@ double f(double x, double y, double t, double Lx, double Ly, int cas)
     {
         res=2*(y-y*y+x-x*x);
     }
-    if(cas==2)
+    else if(cas==2)
     {
         res=sin(x)+cos(y);
     }
-    if(cas==3)
+    else if(cas==3)
     {
         res=exp(-pow(x-(Lx/2),2))*exp(-pow(y-(Ly/2),2))*cos(M_PI*t/2);
     }
@@ -34,11 +34,11 @@ double g(double x, double y, double Lx, double Ly, int cas)
     {
         res=0.0 ;
     }
-    if(cas==2)
+    else if(cas==2)
     {
         res=sin(x)+cos(y);
     }
-    if(cas==3)
+    else if(cas==3)
     {
         res=0.0 ;
     }
@@ -53,11 +53,11 @@ double h(double x, double y, double Lx, double Ly, int cas)
     {
         res=0.0 ;
     }
-    if(cas==2)
+    else if(cas==2)
     {
         res=sin(x)+cos(y);
     }
-    if(cas==3)
+    else if(cas==3)
     {
         res=1.0 ;
     }
@@ -70,8 +70,8 @@ vector<double> F_b(double Lx,double Ly, double beta, double gamma, double dt, do
     vector <double> F(Nx*Ny);
     double x,y,dx,dy;
 
-    dx=Lx/Nx;
-    dy=Ly/Ny;
+    dx=Lx/(Nx+1);
+    dy=Ly/(Ny+1);
 
     x=dx;
     y=dy;
@@ -82,6 +82,7 @@ vector<double> F_b(double Lx,double Ly, double beta, double gamma, double dt, do
     {
         x=x+dx;
         F[j]=U[j]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*gamma*g(x,0,Lx,Ly,cas);
+        
     }
     
     //cas j=Nx-1
@@ -102,7 +103,7 @@ vector<double> F_b(double Lx,double Ly, double beta, double gamma, double dt, do
         y=y+dy;
 
         F[df]=U[df]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(0,y,Lx,Ly,cas);
-        
+        cout<<"h="<<h(0,y,Lx,Ly,cas)<<"   F="<<F[df]<<"   beta="<<beta<<"  f="<<f(x,y,t,Lx,Ly,cas)<<endl;
         for(int j=1;j<Nx-1;j++) // cas pour j différent de 0 et Nx
         {
             x=x+dx;
@@ -112,6 +113,7 @@ vector<double> F_b(double Lx,double Ly, double beta, double gamma, double dt, do
         // cas j=Nx-1
         x=x+dx;
         F[df+Nx-1]=U[df+Nx-1]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(x+dx,y,Lx,Ly,cas);
+        cout<<"h="<<h(x+dx,y,Lx,Ly,cas)<<"   F="<<F[df+Nx-1]<<"   beta="<<beta<<"  f="<<f(x,y,t,Lx,Ly,cas)<<endl;
     }
 
     /////////////////////////////////////////////////////////////////
