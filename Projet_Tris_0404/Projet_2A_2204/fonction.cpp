@@ -76,44 +76,51 @@ vector<double> F_b(double Lx,double Ly, double beta, double gamma, double dt, do
     x=dx;
     y=dy;
     
-    F[0]=U[0]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(0,y,Lx,Ly,cas)-dt*D*gamma*g(x,0,Lx,Ly,cas); // cas j=0 (j boucle dans les blocs)
+    ////////////////////////////////////////////////////////////////
+    // boucle de définition du bord du bas (y=0 et x entre 1 et Nx) ------------------------------------------------------------------------
+    ////////////////////////////////////////////////////////////////
+
+    F[0]=U[0]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(0,y,Lx,Ly,cas)-dt*D*gamma*g(x,0,Lx,Ly,cas); // cas j=0 (j boucle sur x) = coin en bas à gauche
     
-    for(int j=1;j<Nx-1;j++) // cas pour j différent de 0 et Nx-1
+    for(int j=1;j<Nx-1;j++) // segment du bord du bas (sauf les deux coins) cas pour j différent de 0 et Nx-1
     {
         x=x+dx;
         F[j]=U[j]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*gamma*g(x,0,Lx,Ly,cas);
         
     }
     
-    //cas j=Nx-1
-    
+    //cas j=Nx-1 : bord en bas à droite
     x=x+dx;
-
     F[Nx-1]=U[Nx-1]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(x+dx,y,Lx,Ly,cas)-dt*D*gamma*g(x,0,Lx,Ly,cas);
     
+
+
     /////////////////////////////////////////////////////////////////
-    /// cas pour i différent de 0 et Ny-1
+    /// Serpent pour le bloc centrale et les conditions aux limites sur les bords gauches et droits: cas pour i différent de 0 et Ny-1
     /////////////////////////////////////////////////////////////////
     for (int i=1;i<Ny-1;i++) 
     {
-        // cas j=0
+        // cas j=0 : bord gauche (x=0)(sauf coin en bas et en haut à gauche)
         int df; // indice du premier F du bloc
         df=i*Nx;
         x=dx;
         y=y+dy;
-
         F[df]=U[df]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(0,y,Lx,Ly,cas);
-        cout<<"h="<<h(0,y,Lx,Ly,cas)<<"   F="<<F[df]<<"   beta="<<beta<<"  f="<<f(x,y,t,Lx,Ly,cas)<<endl;
+        //cout<<"h="<<h(0,y,Lx,Ly,cas)<<"   F="<<F[df]<<"   beta="<<beta<<"  f="<<f(x,y,t,Lx,Ly,cas)<<endl;
+
+        // centre du domaine (qd il n'y a pas d'iinfluence des conditions de bords)
         for(int j=1;j<Nx-1;j++) // cas pour j différent de 0 et Nx
         {
             x=x+dx;
             F[df+j]=U[df+j]+dt*f(x,y,t,Lx,Ly,cas);
+            //cout<<"df+j="<< df+j <<"   F="<<F[df+j] << endl;
         }
 
-        // cas j=Nx-1
+        // cas j=Nx-1 : bord droit (x=Lx)(sauf coin en bas et en haut à droite)
         x=x+dx;
-        F[df+Nx-1]=U[df+Nx-1]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(x+dx,y,Lx,Ly,cas);
-        cout<<"h="<<h(x+dx,y,Lx,Ly,cas)<<"   F="<<F[df+Nx-1]<<"   beta="<<beta<<"  f="<<f(x,y,t,Lx,Ly,cas)<<endl;
+        F[df+Nx-1]=U[df+Nx-1]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(Lx,y,Lx,Ly,cas); //F[df+Nx-1]=U[df+Nx-1]+dt*f(x,y,t,Lx,Ly,cas)-dt*D*beta*h(x+dx,y,Lx,Ly,cas);
+        cout<<"y="<< y <<"  df+Nx-1="<< df+Nx-1 <<"   F="<<F[df+Nx-1] << endl;
+        // cout<<"h="<<h(x+dx,y,Lx,Ly,cas)<<"   F="<<F[df+Nx-1]<<"   beta="<<beta<<"  f="<<f(x,y,t,Lx,Ly,cas)<<endl;
     }
 
     /////////////////////////////////////////////////////////////////

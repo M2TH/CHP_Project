@@ -1,0 +1,13 @@
+Projet de CHP de Tristan Viana et Matthieu Dhenain
+
+Documentation :
+
+
+Comment compiler notre code :
+ouvrir un terminal dans le dossier du projet (celui ou se trouve le fichier makefile)
+taper "make" dans le terminal
+Cette commande lance les commandes de compilation enregistré dans le fichier makefile.
+
+Exécution :
+
+
