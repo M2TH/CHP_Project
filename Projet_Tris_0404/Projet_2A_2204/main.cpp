@@ -12,6 +12,7 @@
 #include <vector>
 #include <cmath>
 #include "fonction.h"
+#include "gradConj.h"
 #include <string>
 
 
@@ -91,25 +92,30 @@ int main(int argc, char ** argv){
     flux.close();
     
 
+
+
     int cas, maxiter, n;
-    double alpha,beta,gamma,dx,dy, tol;
+    double alpha,beta,gamma,dx,dy,tol;
     double x,y,t;
+    /*
+    double res;  // Qu'est ce que res ? (Inutile dans le main je crois)
+
+    
+    Lx=1;
+    Ly=1;
+    Nx=4;
+    Ny=3;
+    D = 1 ; */
  
+
     cas=2; //cas d'etude
-    tol = 0.01; // tolérance
-    maxiter = 1000 ; 
-
-
-
-
+    tol=0.01;
+    maxiter=1000;
 
     // x=2; // A quoi servent x, y et t  ? est ce la position en x, y et le temps courant respectivement? 
     // y=1;
     // t=1;
     
-
-    // Définition des paramètres supplémentaires
-
     n=Nx*Ny; // dim du maillage
     dx=Lx/Nx; // pas selon x
     dy=Ly/Ny; // pas selon y
@@ -118,9 +124,8 @@ int main(int argc, char ** argv){
     beta=-1/(dx*dx);
     gamma=-1/(dy*dy);
 
-    vector<double> X(n),res_vec(n), condInit(n);
+    vector<double> X(n),res_vec(n),condInit(n),b(n);
    
-   // Initialisation
     
     for(int i=0;i<n;i++)
     {
@@ -133,20 +138,21 @@ int main(int argc, char ** argv){
     // Test du produit matrice vecteur
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    res_vec=matvec(alpha,beta,gamma,Nx,Ny,X);
-    cout<<"alpha="<<alpha<<" beta="<<beta<<" gamma="<<gamma<<endl;
-    cout<<"Voici le résultat :                      avec X:"<<endl;
-    for(int i=0;i<n;i++)
-    {
-        cout<<res_vec[i]<<"                         "<<X[i]<<endl;
-    }
+    // res_vec=matvec(alpha,beta,gamma,Nx,Ny,X);
+    // cout<<"alpha="<<alpha<<" beta="<<beta<<" gamma="<<gamma<<endl;
+    // cout<<"Voici le résultat :                      avec X:"<<endl;
+    // for(int i=0;i<n;i++)
+    // {
+    //     cout<<res_vec[i]<<"                         "<<X[i]<<endl;
+    // }
 
 
 
-    for(int i=0;i<n;i++)
-    {
-        X[i]=0;
-    }
+    // for(int i=0;i<n;i++)
+    // {
+    //     X[i]=0;
+    // }
+
     //X[0]=1;
 
     t=0;
@@ -154,15 +160,16 @@ int main(int argc, char ** argv){
     y=dy;
     cout<<"//////////////////////////////////////////////////////////////////////////"<<endl;
   
-    res_vec=F_b(Lx,Ly,beta,gamma,dt,t,D,cas,Nx,Ny,X);
-    cout<<"dx="<<dx<<" , dy="<<dy<<endl;
-    cout<<dt*f(x,y,t,Lx,Ly,cas)<<endl;
-    cout<<"Voici le second membre :                      avec X:"<<endl;
-    for(int i=0;i<n;i++)
-    {
-        cout<<res_vec[i]<<"                         "<<X[i]<<endl;
-    }
+    // res_vec=F_b(Lx,Ly,beta,gamma,dt,t,D,cas,Nx,Ny,X);
+    // cout<<"dx="<<dx<<" , dy="<<dy<<endl;
+    // cout<<dt*f(x,y,t,Lx,Ly,cas)<<endl;
+    // cout<<"Voici le second membre :                      avec X:"<<endl;
+    // for(int i=0;i<n;i++)
+    // {
+    //    cout<<res_vec[i]<<"                         "<<X[i]<<endl;
+    // }
 
+    cout<<"//////////////////////////////////////////////////////////////////////////"<<endl;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Coeur du programme : appel du gradient conjugué
@@ -176,10 +183,48 @@ int main(int argc, char ** argv){
         condInit[i]=1;
     }
 
+    cout<<"//////////////////////////////////////////////////////////////////////////"<<endl;
 
-    X = gradientConj( condInit , tol, maxiter, alpha, beta, gamma, res_vec);
+    X = gradientConj( condInit , tol, maxiter, Nx, Ny, alpha, beta, gamma,res_vec);
+
+    
+
+    cout<<"Voici la condition initial :                      avec X:"<<endl;
+    for(int i=0;i<n;i++)
+    {
+        cout<<condInit[i]<<"                         "<<X[i]<<endl;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// mettre dans un fichier
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    dt=0.1;
+    for(int k=0;k<11;k++)
+    {
+        t=k*dt
+        b=F_b(Lx,Ly,beta,gamma,dt,t,D,cas,Nx,Ny,X);
+        X = gradientConj( condInit , tol, maxiter, Nx, Ny, alpha, beta, gamma,res_vec);
+
+        ofstream mon_flux; // Contruit un objet "ofstream"
+        string name_file("sol.",k,".dat"); // Le nom de mon fichier
+        mon_flux.open(name_file, ios::out); // Ouvre un fichier appelé name_file
 
 
+        /////////////////////////////////////////////////////////////////
+        /// cas pour i différent de 0 et Ny-1
+        /////////////////////////////////////////////////////////////////
+        for (int i=1;i<Ny-1;i++) 
+        {
+            y=(i+1)*dy
+            for(int j=0;j<Nx;j++) // cas pour j différent de 0 et Nx-1
+            {
+                mon_flux << (1+j)*dx << " " << y << " " << X[j+i*Nx] << " " << endl;
+            }
+        }
+        
+        mon_flux.close(); // Ferme le fichier
+    }
 
     return 0;
 }
