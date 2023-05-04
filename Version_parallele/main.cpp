@@ -4,7 +4,8 @@
 // cf makefile
 
 
-// #include <mpi.h>
+
+#include <mpi.h>
 #include <stdio.h>  //pour le printf
 #include <iostream>
 #include <sstream> 
@@ -12,14 +13,13 @@
 #include <vector>
 #include <cmath>
 #include "fonction.h"
-#include "gradConj.h"
+#include "GradConjMPI.h"
 #include <string>
 
+using namespace std;
 
-int main(int argc, char ** argv){
-
-    using namespace std;
-    
+int main(int argc, char ** argv)
+{
 
 
     /////////////////////////////////////////
@@ -92,19 +92,14 @@ int main(int argc, char ** argv){
     flux.close();
     
 
-
+    ///////////////////////////////////
+    /// INITIALISATION
+    ///////////////////////////////////
 
     int cas, maxiter, n;
     double alpha,beta,gamma,dx,dy,tol;
     double x,y,t;
- 
 
-    cas=2; //cas d'etude
-    tol=0.01;
-    maxiter=1000;
-
-    
-    
     n=Nx*Ny; // dim du maillage
     dx=Lx/(Nx+1); // pas selon x
     dy=Ly/(Ny+1); // pas selon y
@@ -114,51 +109,14 @@ int main(int argc, char ** argv){
     gamma=-1/(dy*dy);
 
     vector<double> X(n),res_vec(n),condInit(n),b(n);
-   
-    
-    for(int i=0;i<n;i++)
-    {
-        X[i]=0;
-    }
-
-    X[4]=1;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // Test du produit matrice vecteur
-    /////////////////////////////////////////////////////////////////////////////////////////////
-
-    // res_vec=matvec(alpha,beta,gamma,Nx,Ny,X);
-    // cout<<"alpha="<<alpha<<" beta="<<beta<<" gamma="<<gamma<<endl;
-    // cout<<"Voici le résultat :                      avec X:"<<endl;
-    // for(int i=0;i<n;i++)
-    // {
-    //     cout<<res_vec[i]<<"                         "<<X[i]<<endl;
-    // }
-
-
-
-    // for(int i=0;i<n;i++)
-    // {
-    //     X[i]=0;
-    // }
-
-    //X[0]=1;
 
     t=0;
     x=dx;
     y=dy;
-    cout<<"//////////////////////////////////////////////////////////////////////////"<<endl;
-  
-    res_vec=F_b(Lx,Ly,beta,gamma,dt,t,D,cas,Nx,Ny,X);
-    // cout<<"dx="<<dx<<" , dy="<<dy<<endl;
-    // cout<<dt*f(x,y,t,Lx,Ly,cas)<<endl;
-    // cout<<"Voici le second membre :                      avec X:"<<endl;
-    // for(int i=0;i<n;i++)
-    // {
-    //    cout<<res_vec[i]<<"                         "<<X[i]<<endl;
-    // }
+    cas=2; //cas d'etude
+    tol=0.01;
+    maxiter=1000;
 
-    cout<<"//////////////////////////////////////////////////////////////////////////"<<endl;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Coeur du programme : appel du gradient conjugué
@@ -166,38 +124,43 @@ int main(int argc, char ** argv){
 
 
 
-    // Construction d'un vecteur condition initial
+    // Construction d'un vecteur condition initial 
     for(int i=0;i<n;i++)
     {
         condInit[i]=1;
     }
 
-    cout<<"//////////////////////////////////////////////////////////////////////////"<<endl;
+    /// Debut parallélisation
 
-    X = gradientConj( condInit , tol, maxiter, Nx, Ny, alpha, beta, gamma,res_vec);
+    int me,nproc;
 
+    MPI_Init(&argc,&argv);
+    MPI_Comm_size(MPI_COMM_WORLD,&nproc);
+    MPI_Comm_rank(MPI_COMM_WORLD,&me);
+
+    int iBeg,iEnd;
+    charge(me,n,nproc,&iBeg,&iEnd);
+    printf("Je suis le proc %d avec iBeg=%d et iEnd=%d\n",me,iBeg,iEnd);
+
+    // X = gradientConj( condInit , tol, maxiter, Nx, Ny, alpha, beta, gamma,res_vec);
+    X = gradientConj_mpi(condInit, tol, maxiter, Nx, Ny, alpha, beta, gamma, res_vec, iBeg, iEnd, np, me);
+
+    // Faut il paralleliser le code dès le main pour envoyer des segments de vecteur dans le gradient conjugué, pour que chaque proc fasse un gradConj sur un vecteur plus petit ?
+    // Cela necessite surement commmunication entre les procs pour se communiqué les "conditions de bords intermédiaires" : cad les conditions de raccordement entre les procs
     
 
-    // cout<<"Voici la condition initial :                      avec X:"<<endl;
-    // for(int i=0;i<n;i++)
-    // {
-    //     cout<<condInit[i]<<"                         "<<X[i]<<endl;
-    // }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// mettre dans un fichier
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    
-    dt=1;
-    cas=2;
     
     for(int k=0;k<10;k++)
     {
         t=k*dt;
         b=F_b(Lx,Ly,beta,gamma,dt,t,D,cas,Nx,Ny,X);
-        X = gradientConj( X , tol, maxiter, Nx, Ny, alpha, beta, gamma,res_vec);
+        // X = gradientConj( X , tol, maxiter, Nx, Ny, alpha, beta, gamma,res_vec);
+        // X = gradientConj( X , tol, maxiter, Nx, Ny, alpha, beta, gamma,b);
+        X = gradientConj_mpi(X, tol, maxiter, Nx, Ny, alpha, beta, gamma, b, iBeg, iEnd, np, me);
 
+        if(me==0){
         ofstream mon_flux; // Contruit un objet "ofstream"
         string name_file("sol.10.dat"); // Le nom de mon fichier
         mon_flux.open(name_file, ios::out); // Ouvre un fichier appelé name_file
@@ -216,7 +179,10 @@ int main(int argc, char ** argv){
         }
         
         mon_flux.close(); // Ferme le fichier
+        }
     }
+
+    MPI_Finalize();
 
     return 0;
 }

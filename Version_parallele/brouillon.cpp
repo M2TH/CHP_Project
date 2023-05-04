@@ -36,26 +36,13 @@ vector<double> gradientConj(Vector& K, double tol, int maxiter, int Nx, int Ny, 
     // K vecteur condition initiale     
     // double alpha, beta, gamma; // Inclu alpha, beta, gamma (les coefficient de la matrice) pris en paramètre 
     // b : vecteur second membre
-    
 
-    ////////////////////////////////////////
-    // !!! ATTRIBUER DES VALEURS à alpha, beta ET gamma (ou les donner lors de l'appel de la fonction)
-    ////////////////////////////////////////
-    
-    // r = AK - b
     Vector AK = matvec(alpha, beta, gamma, Nx, Ny, K);
     
-    // int n = A.size();
     int n = Nx* Ny ;
 
     Vector r(n), d(n) ;
-    ////////////////////////////////////////
-    // !!! ATTRIBUER DES VALEURS A r, d
-    ////////////////////////////////////////
-    // --> Lecture du second memebre b dans les paramètres. r et d initialisé ci dessous
 
-    // Initialisatioin residu r = F - A*x
-    
     for (int i = 0; i < n; i++) {
         r[i] = AK[i] - b[i];
         d[i] = r[i];
@@ -83,7 +70,7 @@ vector<double> gradientConj(Vector& K, double tol, int maxiter, int Nx, int Ny, 
         // coef_a = (r*r) / (d*W)
         coef_a = dot(d, r) / dot(d, W);
 
-        // Màj solution x er residu r
+        // Màj solution x et residu r
         for (int i = 0; i < n; i++) {
             x[i] -= coef_a * d[i];
             r[i] -= coef_a * W[i];

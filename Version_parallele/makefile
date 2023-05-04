@@ -1,10 +1,10 @@
 # Compilateur utilisé
-CC=g++
+CC=mpic++
 
 # Options en mode optimisé - La variable DEBUG est définie comme fausse
-OPTIM_FLAG = -O3 -DNDEBUG -I /home/matthieud/TP_Info/TPC++/EigenLibrary/Eigen -std=c++11
+OPTIM_FLAG = -O3 -DNDEBUG -std=c++11
 # Options en mode debug - La variable est DEBUG est définie comme vraie
-DEBUG_FLAG = -g -DDEBUG -I /home/matthieud/TP_Info/TPC++/EigenLibrary/Eigen -std=c++11
+DEBUG_FLAG = -g -DDEBUG -std=c++11
 
 # On choisit comment on compile
 #CXX_FLAGS = $(DEBUG_FLAG)
@@ -14,7 +14,7 @@ CXX_FLAGS = $(OPTIM_FLAG)
 PROG = run
 
 # Les fichiers source à compiler
-SRC = main.cpp function.cpp gradConj.cpp
+SRC = main.cpp fonction.cpp GradConjMPI.cpp
 
 # La commande complète : compile seulement si un fichier a été modifié
 $(PROG) : $(SRC)
@@ -26,3 +26,10 @@ all : $(PROG)
 # temporaires de sauvegarde (~)
 clean :
 	rm -f *.o *~ $(PROG)
+
+#RAPPEL : 
+#Pour compiler un simple fichier avec MPI :
+# mpic++ -std=c++11 main.cpp -o run
+
+#Pour executer le programme avec 4 procs :
+#mpirun -n 4 ./run
