@@ -3,9 +3,6 @@
 //compilation : 
 // cf makefile
 
-
-
-#include <mpi.h>
 #include <stdio.h>  //pour le printf
 #include <iostream>
 #include <sstream> 
@@ -15,12 +12,14 @@
 #include "fonction.h"
 #include "GradConjMPI.h"
 #include <string>
+#include <mpi.h>
 
-using namespace std;
+
+
 
 int main(int argc, char ** argv)
 {
-
+    using namespace std;
 
     /////////////////////////////////////////
     // Lecture des parametres dans le fichier
@@ -143,13 +142,10 @@ int main(int argc, char ** argv)
     printf("Je suis le proc %d avec iBeg=%d et iEnd=%d\n",me,iBeg,iEnd);
 
     // X = gradientConj( condInit , tol, maxiter, Nx, Ny, alpha, beta, gamma,res_vec);
-    X = gradientConj_mpi(condInit, tol, maxiter, Nx, Ny, alpha, beta, gamma, res_vec, iBeg, iEnd, np, me);
+    X = gradientConj_mpi(condInit, tol, maxiter, Nx, Ny, alpha, beta, gamma, res_vec, iBeg, iEnd, nproc, me);
 
     // Faut il paralleliser le code dès le main pour envoyer des segments de vecteur dans le gradient conjugué, pour que chaque proc fasse un gradConj sur un vecteur plus petit ?
     // Cela necessite surement commmunication entre les procs pour se communiqué les "conditions de bords intermédiaires" : cad les conditions de raccordement entre les procs
-    
-
-
 
     
     for(int k=0;k<10;k++)
@@ -158,7 +154,7 @@ int main(int argc, char ** argv)
         b=F_b(Lx,Ly,beta,gamma,dt,t,D,cas,Nx,Ny,X);
         // X = gradientConj( X , tol, maxiter, Nx, Ny, alpha, beta, gamma,res_vec);
         // X = gradientConj( X , tol, maxiter, Nx, Ny, alpha, beta, gamma,b);
-        X = gradientConj_mpi(X, tol, maxiter, Nx, Ny, alpha, beta, gamma, b, iBeg, iEnd, np, me);
+        X = gradientConj_mpi(X, tol, maxiter, Nx, Ny, alpha, beta, gamma, b, iBeg, iEnd, nproc, me);
 
         if(me==0){
         ofstream mon_flux; // Contruit un objet "ofstream"
